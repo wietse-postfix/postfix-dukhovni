@@ -1,0 +1,196 @@
+<!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html> <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title> Postfix manual - mongodb_table(5) </title>
+</head> <body> <pre>
+MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
+
+<b>NAME</b>
+       mongodb_table - Postfix MongoDB client configuration
+
+<b>SYNOPSIS</b>
+       <b>postmap -q "</b><i>string</i><b>" mongodb:/etc/postfix/</b><i>filename</i>
+
+       <b>postmap -q - mongodb:/etc/postfix/</b><i>filename</i> &lt;<i>inputfile</i>
+
+<b>DESCRIPTION</b>
+       The  Postfix  mail system uses optional tables for address rewriting or
+       mail routing. These tables are usually in <b>dbm</b> or <b>db</b> format.
+
+       Alternatively, lookup tables can be specified as MongoDB databases.  In
+       order to use MongoDB lookups, define a MongoDB source as a lookup table
+       in <a href="postconf.5.html">main.cf</a>, for example:
+           <a href="postconf.5.html#alias_maps">alias_maps</a> = mongodb:/etc/postfix/mongodb-aliases.cf
+
+       In this example, the file /etc/postfix/mongodb-aliases.cf has the  same
+       format  as  the  Postfix  <a href="postconf.5.html">main.cf</a>  file, and can specify the parameters
+       described below.
+
+       It is strongly recommended to use <a href="proxymap.8.html">proxy</a>:mongodb, in order to reduce the
+       number of database connections. For example:
+           <a href="postconf.5.html#alias_maps">alias_maps</a> = <a href="proxymap.8.html">proxy</a>:mongodb:/etc/postfix/mongodb-aliases.cf
+
+       Note:  when using <a href="proxymap.8.html">proxy</a>:mongodb:/<i>file</i>, the file must be readable by the
+       unprivileged postfix user (specified with the Postfix  <a href="postconf.5.html#mail_owner">mail_owner</a>  con-
+       figuration parameter).
+
+<b>MONGODB PARAMETERS</b>
+       <b>uri</b>    The URI of mongo server/cluster that Postfix will try to connect
+              to and query from.  Please see <b><a href="https://www.mongodb.com/docs/man-</b>
+">https://www.mongodb.com/docs/man-</b>
+</a>              <b>ual/reference/connection-string/</b> Examples:
+                  uri = mongodb+srv://user:pass@loclhost:27017/mail
+
+       <b>dbname</b> Name of the database to read the information from.  Example:
+                  dbname = mail
+
+       <b>collection</b>
+              Name  of  the  collection  (table) to read the information from.
+              Example:
+                  collection = mailbox
+
+       <b>query_filter</b>
+              The MongoDB query template used to search the database, where <b>%s</b>
+              is  a  substitute  for the address Postfix is trying to resolve.
+              Please       see       <b><a href="https://www.mongodb.com/docs/manual/tuto-</b>
+">https://www.mongodb.com/docs/manual/tuto-</b>
+</a>              <b>rial/query-documents/</b>
+
+              e.g.
+                  query_filter = {"$$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
+
+              This parameter supports the following '%' expansions:
+
+              <b>%%</b>     This is replaced by a literal '%' character.
+
+              <b>$$</b>     This is replaced by a literal '$' character.
+
+              <b>%s</b>     This  is  replaced  by  the  input  key.   No  quoting is
+                     applied.  This  is  to  allow  for  different  data  type
+                     searches.   for example, {"key": %s} differs from {"key":
+                     "%s"} in that the second  query  searches  for  a  string
+                     type, where is the first can be looking for a number.
+
+              <b>%u</b>     When the input key is an address of the form user@domain,
+                     <b>%u</b> is replaced by the local part of the address.   Other-
+                     wise, <b>%u</b> is replaced by the entire search string.
+
+              <b>%d</b>     When the input key is an address of the form user@domain,
+                     <b>%d</b> is replaced by the domain part of the address.
+
+              <b>%[1-9]</b> The patterns %1, %2, ... %9 are replaced  by  the  corre-
+                     sponding  most  significant  component of the input key's
+                     domain. If the input key is  <i>user@mail.example.com</i>,  then
+                     %1 is <b>com</b>, %2 is <b>example</b> and %3 is <b>mail</b>.
+
+       <b>projection (optional)</b>
+              Advanced MongoDB query projections. Please see: <b><a href="https://www.mon-</b>
+">https://www.mon-</b>
+</a>              <b>godb.com/docs/manual/tutorial/project-fields-from-query-results/</b>
+
+              NOTE:  If  a projection is specified, 'result_attribute' will be
+              ignored.
+
+              NOTE: Please keep in mind, this implementation  can  only  parse
+              and  return string (UTF8), integer (int32, int64) and array type
+              fields. Any other type of field in the result will raise a warn-
+              ing.  Make sure to adjust the projection as needed.  Please see:
+              <b><a href="https://mongoc.org/libbson/current/bson_type_t.html</b>">https://mongoc.org/libbson/current/bson_type_t.html</b></a>
+
+              For example, _id field (type OID) can not be parsed  and  should
+              be turned off :
+                  projection = { "_id":0, "mail_path": {"$$concat": ["$$domain", "/", "$$local_part"]} }
+
+       <b>result_attribute</b>
+              Comma seperated list of fields to be returned.
+
+       <b>result_format (default: %s</b>)
+              Format template applied to result attributes. Most commonly used
+              to append (or prepend) text to the result. This  parameter  sup-
+              ports the following '%' expansions:
+
+              NOTE:  If  a  projection is not specified, 'result_attribute' is
+              required.
+
+              <b>%%</b>     This is replaced by a literal '%' character. (Postfix 2.2
+                     and later).
+
+              <b>%s</b>     This  is  replaced  by the value of the result attribute.
+                     When result is empty it is skipped.
+
+              <b>%u</b>     When the result attribute value is an address of the form
+                     user@domain,  <b>%u</b>  is  replaced  by  the local part of the
+                     address. When the result has an  empty  localpart  it  is
+                     skipped.
+
+              <b>%d</b>     When  a  result attribute value is an address of the form
+                     user@domain, <b>%d</b> is replaced by the  domain  part  of  the
+                     attribute  value.  When  the  result is unqualified it is
+                     skipped.
+
+              <b>%[SUD1-9]</b>
+                     The upper-case and decimal digit  expansions  interpolate
+                     the  parts of the input key rather than the result. Their
+                     behavior is identical to that described  with  <b>query_fil-</b>
+                     <b>ter</b>,  and  in  fact  because  the  input  key is known in
+                     advance, lookups whose  key  does  not  contain  all  the
+                     information  specified  in  the  result template are sup-
+                     pressed and return no results.
+
+              For example, using "result_format = <a href="smtp.8.html">smtp</a>:[%s]" allows one to use
+              a mailHost attribute as the basis of a <a href="transport.5.html">transport(5)</a> table. After
+              applying the result format, multiple values are concatenated  as
+              comma separated strings. The expansion_limit parameter explained
+              below allows one to restrict the number of values in the result,
+              which  is especially useful for maps that should return a single
+              value.
+
+              The default value <b>%s</b> specifies that each attribute value  should
+              be used as is.
+
+              NOTE: DO NOT put quotes around the result format!
+
+       <b>domain (default: no domain list)</b>
+              This  is a list of domain names, paths to files, or "<a href="DATABASE_README.html">type:table</a>"
+              databases. When specified, only fully qualified search keys with
+              a  *non-empty*  localpart and a matching domain are eligible for
+              lookup:  'user'  lookups,  bare  domain  lookups  and  "@domain"
+              lookups  are  not  performed.  This can significantly reduce the
+              query load on the backend database. Example:
+                  domain = postfix.org, <a href="DATABASE_README.html#types">hash</a>:/etc/postfix/searchdomains
+
+       <b>expansion_limit (default: 0)</b>
+              A limit on the total number of result elements  returned  (as  a
+              comma separated list) by a lookup against the map.  A setting of
+              zero disables the limit. Lookups fail with a temporary error  if
+              the  limit  is  exceeded.   Setting  the limit to 1 ensures that
+              lookups do not return multiple values.
+
+<b>SEE ALSO</b>
+       <a href="postmap.1.html">postmap(1)</a>, Postfix lookup table maintenance
+       <a href="postconf.5.html">postconf(5)</a>, configuration parameters
+
+<b>README FILES</b>
+       <a href="DATABASE_README.html">DATABASE_README</a>, Postfix lookup table overview
+       <a href="MONGODB_README.html">MONGODB_README</a>, Postfix MONGODB client guide
+
+<b>LICENSE</b>
+       The Secure Mailer license must be distributed with this software.
+
+<b>HISTORY</b>
+       MongoDB support was introduced with Postfix version 3.9.
+
+<b>AUTHOR(S)</b>
+       Hamid Maadani (hamid@dexo.tech)
+       Dextrous Technologies, LLC
+       P.O. Box 213
+       5627 Kanan Rd.,
+       Agoura Hills, CA, USA#
+
+       Based on prior work by:
+       Stephan Ferraro
+       Aionda GmbH
+
+                                                              MONGODB_TABLE(5)
+</pre> </body> </html>
