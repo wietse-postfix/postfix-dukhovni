@@ -29,7 +29,7 @@ from a vendor-specific source package.
 
 The Postfix MongoDB client requires the mongo-c-driver library. This can be
 built from source code from the mongod-c project, or as a binary package from
-your OS distribution, typically named mmoonnggoo--cc--ddrriivveerr--ddeevveell or lliibbmmoobbggoo--ddeevv.
+your OS distribution, typically named mmoonnggoo--cc--ddrriivveerr--ddeevveell or lliibbmmoonnggoocc--ddeevv.
 
 In order to build Postfix with mongodb map support, you will need to add -
 DHAS_MONGODB and -I for the directory containing the mongodb headers, the
