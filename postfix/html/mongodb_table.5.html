@@ -2,6 +2,7 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html> <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel='stylesheet' type='text/css' href='postfix-doc.css'>
 <title> Postfix manual - mongodb_table(5) </title>
 </head> <body> <pre>
 MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
@@ -103,7 +104,7 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
                   projection = { "_id":0, "mail_path": {"$$concat": ["$$domain", "/", "$$local_part"]} }
 
        <b>result_attribute</b>
-              Comma seperated list of fields to be returned.
+              Comma separated list of fields to be returned.
 
        <b>result_format (default: %s</b>)
               Format template applied to result attributes. Most commonly used
