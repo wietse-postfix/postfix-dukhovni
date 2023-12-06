@@ -110,7 +110,7 @@
 #	    projection = { "_id":0, "mail_path": {"$$concat": ["$$domain", "/", "$$local_part"]} }
 # .fi
 # .IP "\fBresult_attribute\fR"
-#	Comma seperated list of fields to be returned.
+#	Comma separated list of fields to be returned.
 # .IP "\fBresult_format (default: \fB%s\fR)\fR"
 #	Format template applied to result attributes. Most commonly
 #	used to append (or prepend) text to the result. This parameter

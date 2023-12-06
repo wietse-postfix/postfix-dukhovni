@@ -272,7 +272,7 @@ static char *get_result_string(DICT_MONGODB *dict_mongodb,
 	    /*
 	     * XXX(Wietse) are there any non-error cases, such as a valid but
 	     * empty array, where bson_new_from_data() or bson_iter_init()
-	     * would return null or false? If there are no such cases when we
+	     * would return null or false? If there are no such cases then we
 	     * must handle null/false as an error.
 	     */
 	    bson_iter_array(iter, &len, &dataBuffer);
