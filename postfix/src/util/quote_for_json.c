@@ -16,16 +16,16 @@
 /*	const char *in,
 /*	ssize_t	len)
 /* DESCRIPTION
-/*	quote_for_json() takes a well-formed sequence of UTF-8 encoded
-/*	bytes, quotes them compliant with RFC 4627, and returns a
+/*	quote_for_json() takes well-formed UTF-8 encoded text,
+/*	quotes that text compliant with RFC 4627, and returns a
 /*	pointer to the resulting text. The input may contain null
 /*	bytes, but the output will not.
 /*
 /*	quote_for_json() produces short (two-letter) escape sequences
 /*	for common control characters, double quote and backslash.
 /*	It will not quote "/" (0x2F), and will quote DEL (0x7f) as
-/*	\u007F to make it printable. It passes through valid \uXXXX
-/*	hexadecimal encodings and all non-ASCII byte values.
+/*	\u007F to make it printable. The input byte sequence "\uXXXX"
+/*	is quoted like any other text (the "\" is escaped as "\\").
 /*
 /*	quote_for_json() does not perform UTF-8 validation. The caller
 /*	should use valid_utf8_string() or printable() as appropriate.
@@ -113,13 +113,6 @@ char   *quote_for_json_append(VSTRING *result, const char *text, ssize_t len)
 	} else {
 	    switch (ch) {
 	    case '\\':
-		/* Pass through well-formed \uxxxx forms, escape garbage. */
-		if (cp[1] == 'u' && allhex_len(cp + 2, 4)) {
-		    vstring_memcat(result, cp, 6);
-		    cp += 5;
-		    continue;
-		}
-		/* FALLTHROUGH */
 	    case '"':
 		VSTRING_ADDCH(result, '\\');
 		/* FALLTHROUGH */
@@ -183,7 +176,7 @@ static const TEST_CASE test_cases[] = {
 	"\0\01\037\040\176\177", 6, "\\u0000\\u0001\\u001F ~\\u007F",
     },
     {"malformed UTF-8", quote_for_json,
-	"\\*\\uasd\x80", -1, "\\\\*\\\\uasd\x80",
+	"\\*\\uasd\\u007F\x80", -1, "\\\\*\\\\uasd\\\\u007F\x80",
     },
     0,
 };
