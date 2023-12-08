@@ -21,7 +21,9 @@
 #
 #	In this example, the file /etc/postfix/mongodb-aliases.cf
 #	has the same format as the Postfix main.cf file, and can
-#	specify the parameters described below.
+#	specify the parameters described below. It is also possible
+#	to have the configuration in main.cf; see "OBSOLETE MAIN.CF
+#	PARAMETERS" below.
 #
 #	It is strongly recommended to use proxy:mongodb, in order
 #	to reduce the number of database connections. For example:
@@ -63,20 +65,18 @@
 #
 #	e.g.
 # .nf
-#	    query_filter = {"$$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
+#	    query_filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
 # .fi
 #
 #	This parameter supports the following '%' expansions:
 # .RS
 # .IP "\fB%%\fR"
 #	This is replaced by a literal '%' character.
-# .IP "\fB$$\fR"
-#	This is replaced by a literal '$' character.
 # .IP "\fB%s\fR"
-#	This is replaced by the input key.
-#	No quoting is applied. This is to allow for different data type searches.
-#	for example, {"key": %s} differs from {"key": "%s"} in that the second
-#	query searches for a string type, where is the first can be looking for a number.
+#	This is replaced by the input key. The %s must appear in
+#	quotes, because all Postfix queries are strings containing
+#	(parts from) domains or email addresses; Postfix makes no
+#	numerical queries.
 # .IP "\fB%u\fR"
 #	When the input key is an address of the form user@domain, \fB%u\fR
 #	is replaced by the local part of the address.
@@ -90,6 +90,11 @@
 #	input key is \fIuser@mail.example.com\fR, then %1 is \fBcom\fR,
 #	%2 is \fBexample\fR and %3 is \fBmail\fR.
 # .RE
+# .PP
+#	In the above substitutions, charcaters will be quoted as
+#	required by RFC 4627. For example, each double quote or
+#	backslash character will be escaped with a backslash
+#	characacter.
 # .IP "\fBprojection (optional)\fR"
 #	Advanced MongoDB query projections. Please see:
 #	\fBhttps://www.mongodb.com/docs/manual/tutorial/project-fields-from-query-results/\fR
@@ -107,7 +112,7 @@
 #	For example, _id field (type OID) can not be parsed and
 #	should be turned off :
 # .nf
-#	    projection = { "_id":0, "mail_path": {"$$concat": ["$$domain", "/", "$$local_part"]} }
+#	    projection = { "_id":0, "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
 # .fi
 # .IP "\fBresult_attribute\fR"
 #	Comma separated list of fields to be returned.
@@ -173,6 +178,21 @@
 #	temporary error if the limit is exceeded.  Setting the
 #	limit to 1 ensures that lookups do not return multiple
 #	values.
+# OBSOLETE MAIN.CF PARAMETERS
+# .ad
+# .fi
+#	MongoDB parameters can also be defined in main.cf. Specify
+#	as MongoDB source a name that doesn't begin with a slash
+#	or a dot. The MongoDB parameters will then be accessible
+#	as the name you've given the source in its definition, an
+#	underscore, and the name of the parameter. For example,
+#	if a map is specified as "mongodb:\fImongodb_source\fR",
+#	the "uri" parameter would be defined in main.cf as
+#	"\fImongodb_source\fR_uri".
+#
+#	Note: with this form, passwords are written in main.cf,
+#	which is normally world-readable, and '$' in a mongodb
+#	parameter setting needs to be written as '$$'.
 # SEE ALSO
 #	postmap(1), Postfix lookup table maintenance
 #	postconf(5), configuration parameters

@@ -26,14 +26,15 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
 
        In this example, the file /etc/postfix/mongodb-aliases.cf has the  same
        format  as  the  Postfix  <a href="postconf.5.html">main.cf</a>  file, and can specify the parameters
-       described below.
+       described below. It is also  possible  to  have  the  configuration  in
+       <a href="postconf.5.html">main.cf</a>; see "OBSOLETE MAIN.CF PARAMETERS" below.
 
        It is strongly recommended to use <a href="proxymap.8.html">proxy</a>:mongodb, in order to reduce the
        number of database connections. For example:
            <a href="postconf.5.html#alias_maps">alias_maps</a> = <a href="proxymap.8.html">proxy</a>:mongodb:/etc/postfix/mongodb-aliases.cf
 
-       Note:  when using <a href="proxymap.8.html">proxy</a>:mongodb:/<i>file</i>, the file must be readable by the
-       unprivileged postfix user (specified with the Postfix  <a href="postconf.5.html#mail_owner">mail_owner</a>  con-
+       Note: when using <a href="proxymap.8.html">proxy</a>:mongodb:/<i>file</i>, the file must be readable by  the
+       unprivileged  postfix  user (specified with the Postfix <a href="postconf.5.html#mail_owner">mail_owner</a> con-
        figuration parameter).
 
 <b>MONGODB PARAMETERS</b>
@@ -47,31 +48,28 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
                   dbname = mail
 
        <b>collection</b>
-              Name  of  the  collection  (table) to read the information from.
+              Name of the collection (table) to  read  the  information  from.
               Example:
                   collection = mailbox
 
        <b>query_filter</b>
               The MongoDB query template used to search the database, where <b>%s</b>
-              is  a  substitute  for the address Postfix is trying to resolve.
+              is a substitute for the address Postfix is  trying  to  resolve.
               Please       see       <b><a href="https://www.mongodb.com/docs/manual/tuto-</b>
 ">https://www.mongodb.com/docs/manual/tuto-</b>
 </a>              <b>rial/query-documents/</b>
 
               e.g.
-                  query_filter = {"$$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
+                  query_filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
 
               This parameter supports the following '%' expansions:
 
               <b>%%</b>     This is replaced by a literal '%' character.
 
-              <b>$$</b>     This is replaced by a literal '$' character.
-
-              <b>%s</b>     This  is  replaced  by  the  input  key.   No  quoting is
-                     applied.  This  is  to  allow  for  different  data  type
-                     searches.   for example, {"key": %s} differs from {"key":
-                     "%s"} in that the second  query  searches  for  a  string
-                     type, where is the first can be looking for a number.
+              <b>%s</b>     This is replaced by the input key. The %s must appear  in
+                     quotes,  because all Postfix queries are strings contain-
+                     ing (parts from)  domains  or  email  addresses;  Postfix
+                     makes no numerical queries.
 
               <b>%u</b>     When the input key is an address of the form user@domain,
                      <b>%u</b> is replaced by the local part of the address.   Other-
@@ -84,6 +82,10 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
                      sponding  most  significant  component of the input key's
                      domain. If the input key is  <i>user@mail.example.com</i>,  then
                      %1 is <b>com</b>, %2 is <b>example</b> and %3 is <b>mail</b>.
+
+       In  the  above  substitutions, charcaters will be quoted as required by
+       <a href="https://tools.ietf.org/html/rfc4627">RFC 4627</a>. For example, each double quote or backslash character will be
+       escaped with a backslash characacter.
 
        <b>projection (optional)</b>
               Advanced MongoDB query projections. Please see: <b><a href="https://www.mon-</b>
@@ -101,7 +103,7 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
 
               For example, _id field (type OID) can not be parsed  and  should
               be turned off :
-                  projection = { "_id":0, "mail_path": {"$$concat": ["$$domain", "/", "$$local_part"]} }
+                  projection = { "_id":0, "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
 
        <b>result_attribute</b>
               Comma separated list of fields to be returned.
@@ -167,6 +169,18 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
               zero disables the limit. Lookups fail with a temporary error  if
               the  limit  is  exceeded.   Setting  the limit to 1 ensures that
               lookups do not return multiple values.
+
+<b>OBSOLETE MAIN.CF PARAMETERS</b>
+       MongoDB parameters can also be defined in <a href="postconf.5.html">main.cf</a>. Specify  as  MongoDB
+       source  a  name  that  doesn't begin with a slash or a dot. The MongoDB
+       parameters will then be accessible as the name you've given the  source
+       in  its  definition,  an underscore, and the name of the parameter. For
+       example, if a map is specified as "mongodb:<i>mongodb</i><b>_</b><i>source</i>",  the  "uri"
+       parameter would be defined in <a href="postconf.5.html">main.cf</a> as "<i>mongodb</i><b>_</b><i>source</i>_uri".
+
+       Note:  with  this form, passwords are written in <a href="postconf.5.html">main.cf</a>, which is nor-
+       mally world-readable, and '$' in a mongodb parameter setting  needs  to
+       be written as '$$'.
 
 <b>SEE ALSO</b>
        <a href="postmap.1.html">postmap(1)</a>, Postfix lookup table maintenance

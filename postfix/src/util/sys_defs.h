@@ -1760,6 +1760,7 @@ typedef const char *CONST_CHAR_STAR;
 #define ISALPHA(c)	(ISASCII(c) && isalpha((unsigned char)(c)))
 #define ISCNTRL(c)	(ISASCII(c) && iscntrl((unsigned char)(c)))
 #define ISDIGIT(c)	(ISASCII(c) && isdigit((unsigned char)(c)))
+#define ISXDIGIT(c)	(ISASCII(c) && isxdigit((unsigned char)(c)))
 #define ISGRAPH(c)	(ISASCII(c) && isgraph((unsigned char)(c)))
 #define ISLOWER(c)	(ISASCII(c) && islower((unsigned char)(c)))
 #define ISPRINT(c)	(ISASCII(c) && isprint((unsigned char)(c)))

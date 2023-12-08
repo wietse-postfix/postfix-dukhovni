@@ -165,7 +165,7 @@ static void mongodb_parse_config(DICT_MONGODB *dict_mongodb,
     dict_mongodb->uri = cfg_get_str(p, "uri", NULL, 1, 0);
     dict_mongodb->dbname = cfg_get_str(p, "dbname", NULL, 1, 0);
     dict_mongodb->collection = cfg_get_str(p, "collection", NULL, 1, 0);
-    dict_mongodb->query_filter = cfg_get_str(p, "query_filter", NULL, 1, 0);
+    dict_mongodb->query_filter = cfg_get_str(p, "query_filter", NULL, 0, 0);
     if (dict_mongodb->query_filter == 0)
 	dict_mongodb->query_filter = cfg_get_str(p, "filter", NULL, 1, 0);
 
@@ -304,6 +304,14 @@ static char *get_result_string(DICT_MONGODB *dict_mongodb,
     return (vstring_str(resultString));
 }
 
+/* dict_mongdb_quote - quote json string */
+
+static void dict_mongdb_quote(DICT *dict, const char *name, VSTRING *result)
+{
+    /* quote_for_json_append() will resize the result buffer as needed. */
+    (void) quote_for_json_append(result, name, -1);
+}
+
 /* dict_mongodb_lookup - find database entry using mongo query language */
 
 static const char *dict_mongodb_lookup(DICT *dict, const char *name)
@@ -388,7 +396,7 @@ static const char *dict_mongodb_lookup(DICT *dict, const char *name)
 	/* Create a projection using result_attribute. */
 	if (!dict_mongodb->result_attribute) {
 	    msg_panic("%s:%s: 'result_attribute' can not be empty!",
-		     dict_mongodb->dict.type, dict_mongodb->dict.name);
+		      dict_mongodb->dict.type, dict_mongodb->dict.name);
 	}
 	char   *ra = mystrdup(dict_mongodb->result_attribute);
 	char   *pp = ra;
@@ -409,7 +417,7 @@ static const char *dict_mongodb_lookup(DICT *dict, const char *name)
      */
     INIT_VSTR(queryString, BUFFER_SIZE);
     if (!db_common_expand(dict_mongodb->ctx, dict_mongodb->query_filter,
-			  name, 0, queryString, 0))
+			  name, 0, queryString, dict_mongdb_quote))
 	/* Suppress the actual lookup if the expansion is empty. */
 	DICT_MONGODB_LOOKUP_RETURN(0);
 
