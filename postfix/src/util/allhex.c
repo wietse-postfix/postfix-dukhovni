@@ -61,8 +61,7 @@ int     allhex_len(const char *string, ssize_t len)
 	len = strlen(string);
     if (len == 0)
 	return (0);
-    for (cp = string; cp < string + len
-	 && (ch = *(unsigned char *) cp) != 0; cp++)
+    for (cp = string; cp < string + len; cp++)
 	if (!ISXDIGIT(ch))
 	    return (0);
     return (1);

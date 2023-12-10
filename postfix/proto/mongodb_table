@@ -91,7 +91,7 @@
 #	%2 is \fBexample\fR and %3 is \fBmail\fR.
 # .RE
 # .PP
-#	In the above substitutions, charcaters will be quoted as
+#	In the above substitutions, characters will be quoted as
 #	required by RFC 4627. For example, each double quote or
 #	backslash character will be escaped with a backslash
 #	characacter.
