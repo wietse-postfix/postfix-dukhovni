@@ -65,7 +65,7 @@
 #
 #	e.g.
 # .nf
-#	    query_filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
+#	    query_filter = {"$or": [{"username": "%s"}, {"alias.address": "%s"}], "active": 1}
 # .fi
 #
 #	This parameter supports the following '%' expansions:
@@ -75,7 +75,7 @@
 # .IP "\fB%s\fR"
 #	This is replaced by the input key. The %s must appear in
 #	quotes, because all Postfix queries are strings containing
-#	(parts from) domains or email addresses; Postfix makes no
+#	(parts from) a domain or email address. Postfix makes no
 #	numerical queries.
 # .IP "\fB%u\fR"
 #	When the input key is an address of the form user@domain, \fB%u\fR
@@ -112,7 +112,7 @@
 #	For example, _id field (type OID) can not be parsed and
 #	should be turned off :
 # .nf
-#	    projection = { "_id":0, "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
+#	    projection = { "_id": 0, "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
 # .fi
 # .IP "\fBresult_attribute\fR"
 #	Comma separated list of fields to be returned.
