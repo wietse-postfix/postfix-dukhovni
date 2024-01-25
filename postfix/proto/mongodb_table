@@ -110,7 +110,7 @@
 #	\fBhttps://mongoc.org/libbson/current/bson_type_t.html\fR
 #
 #	For example, _id field (type OID) can not be parsed and
-#	should be turned off :
+#	should be turned off:
 # .nf
 #	    projection = { "_id": 0, "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
 # .fi
