@@ -75,12 +75,12 @@ $shlib_directory/lib${LIB_PREFIX}master${LIB_SUFFIX}:f:root:-:755
 $shlib_directory/${LIB_PREFIX}cdb${LIB_SUFFIX}:f:root:-:755
 $shlib_directory/${LIB_PREFIX}ldap${LIB_SUFFIX}:f:root:-:755
 $shlib_directory/${LIB_PREFIX}lmdb${LIB_SUFFIX}:f:root:-:755
+$shlib_directory/${LIB_PREFIX}mongodb${LIB_SUFFIX}:f:root:-:755
 $shlib_directory/${LIB_PREFIX}mysql${LIB_SUFFIX}:f:root:-:755
 $shlib_directory/${LIB_PREFIX}pcre${LIB_SUFFIX}:f:root:-:755
 $shlib_directory/${LIB_PREFIX}pgsql${LIB_SUFFIX}:f:root:-:755
 $shlib_directory/${LIB_PREFIX}sdbm${LIB_SUFFIX}:f:root:-:755
 $shlib_directory/${LIB_PREFIX}sqlite${LIB_SUFFIX}:f:root:-:755
-$shlib_directory/${LIB_PREFIX}mongodb${LIB_SUFFIX}:f:root:-:755
 $meta_directory/dynamicmaps.cf.d:d:root:-:755
 $meta_directory/dynamicmaps.cf:f:root:-:644
 $meta_directory/main.cf.proto:f:root:-:644

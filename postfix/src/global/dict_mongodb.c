@@ -158,6 +158,7 @@ static void mongodb_parse_config(DICT_MONGODB *dict_mongodb,
 				         const char *mongodbcf)
 {
     CFG_PARSER *p = dict_mongodb->parser;
+    char   *junk;
 
     /*
      * Parse the configuration file.
@@ -172,7 +173,16 @@ static void mongodb_parse_config(DICT_MONGODB *dict_mongodb,
     /*
      * One of projection and result_attribute must be specified. That is
      * enforced in the caller.
+     * 
+     * Insert a gratuitous "_id": 0 into the projection, for parity with the
+     * result_attribute feature which implicitly suppresses the _id field.
      */
+    junk = cfg_get_str(p, "projection", NULL, 0, 0);
+    if (junk != 0 && *junk == '{') {
+	dict_mongodb->projection =
+	    concatenate("{\"_id\": 0,", junk + 1, (char *) 0);
+	myfree(junk);
+    }
     dict_mongodb->projection = cfg_get_str(p, "projection", NULL, 0, 0);
     dict_mongodb->result_attribute
 	= cfg_get_str(p, "result_attribute", NULL, 0, 0);
@@ -217,7 +227,7 @@ static bool expand_value(DICT_MONGODB *dict_mongodb, const char *p,
     }
 
     /*
-     * XXX(Wietse) Added the dict_mongodb_lookup() lookup name argument,
+     * XXX(Wietse) Added the dict_mongodb_lookup() lookup_name argument,
      * because it selects code paths inside db_common_expand() that are
      * specifically for lookup results instead of lookup keys, including
      * %[SUD] substitution.
@@ -395,7 +405,7 @@ static const char *dict_mongodb_lookup(DICT *dict, const char *name)
     } else {
 	/* Create a projection using result_attribute. */
 	if (!dict_mongodb->result_attribute) {
-	    msg_panic("%s:%s: 'result_attribute' can not be empty!",
+	    msg_panic("%s:%s: 'result_attribute' cannot be empty!",
 		      dict_mongodb->dict.type, dict_mongodb->dict.name);
 	}
 	char   *ra = mystrdup(dict_mongodb->result_attribute);
@@ -412,8 +422,8 @@ static const char *dict_mongodb_lookup(DICT *dict, const char *name)
     }
 
     /*
-     * Expand filter template. XXX(Wietse) Need a 'quote function' to prevent
-     * metacharacter injection.
+     * Expand filter template. This uses a quoting function to prevent
+     * metacharacter injection with parts from a crafted email address.
      */
     INIT_VSTR(queryString, BUFFER_SIZE);
     if (!db_common_expand(dict_mongodb->ctx, dict_mongodb->query_filter,

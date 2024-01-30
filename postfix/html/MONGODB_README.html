@@ -42,12 +42,13 @@ This can be built from source code from <a
 href="https://github.com/mongodb/mongo-c-driver/releases">the
 mongod-c project</a>, or as a binary package from your OS distribution,
 typically named <b>mongo-c-driver-devel</b> or <b>libmongoc-dev</b>.
-</p>
+Installing the mongo-c-driver library may also install <b>libbson</b>
+as a dependency. </p>
 
-<p>In order to build Postfix with mongodb map support, you will
-need to add -DHAS_MONGODB and -I for the directory containing the
-mongodb headers, the libmongoc-1.0 and libbson-1.0 libraries to
-<a href="MONGODB_README.html">AUXLIBS_MONGODB</a>, for example:</p>
+<p> To build Postfix with mongodb map support, add to the CCARGS
+environment variable the options -DHAS_MONGODB and -I for the
+directory containing the mongodb headers, and specify the <a href="MONGODB_README.html">AUXLIBS_MONGODB</a>
+with the libmongoc and libbson libraries, for example:</p>
 
 <blockquote>
 <pre>
@@ -140,7 +141,7 @@ with all email addresses in this list. </p>
 <blockquote> 
 <pre>
 filter = {"name": "%s", "active": 1}
-return_attribute = address
+result_attribute = address
 </pre>
 </blockquote> 
 
@@ -170,8 +171,7 @@ uri = mongodb+srv://user_name:password@some_server
 dbname = mail
 collection = mailbox
 filter = {"$$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
-projection = { "_id": 0, "mail_path": 
-  {"$$concat": ["$$domain", "/", "$$local_part"]} }
+projection = { "mail_path": {"$$concat": ["$$domain", "/", "$$local_part"]} }
 </pre>
 </blockquote> 
 
@@ -181,10 +181,8 @@ projection = { "_id": 0, "mail_path":
 
 <ul>
 
-<li><p>The '_id' field is always returned as part of the result set
-by MongoDB. It should be excluded from the result in the projection.
-This is done automatically when <b>result_attribute</b> is used.
-</p></li>
+<li><p>As with <b>result_attribute</b>, the mongodb client automatically
+removes the '_id' field from a projection result. </p></li>
 
 <li><p>When a query produces multiple results (separated by comma),
 the Postfix implementation will only parse fields with data types

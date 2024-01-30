@@ -30,10 +30,12 @@ from a vendor-specific source package.
 The Postfix MongoDB client requires the mongo-c-driver library. This can be
 built from source code from the mongod-c project, or as a binary package from
 your OS distribution, typically named mmoonnggoo--cc--ddrriivveerr--ddeevveell or lliibbmmoonnggoocc--ddeevv.
+Installing the mongo-c-driver library may also install lliibbbbssoonn as a dependency.
 
-In order to build Postfix with mongodb map support, you will need to add -
-DHAS_MONGODB and -I for the directory containing the mongodb headers, the
-libmongoc-1.0 and libbson-1.0 libraries to AUXLIBS_MONGODB, for example:
+To build Postfix with mongodb map support, add to the CCARGS environment
+variable the options -DHAS_MONGODB and -I for the directory containing the
+mongodb headers, and specify the AUXLIBS_MONGODB with the libmongoc and libbson
+libraries, for example:
 
     % make tidy
     % make -f Makefile.init makefiles \
@@ -99,7 +101,7 @@ using the filter below, will result in a comma separated string with all email
 addresses in this list.
 
     filter = {"name": "%s", "active": 1}
-    return_attribute = address
+    result_attribute = address
 
 EExxaammppllee:: aaddvvaanncceedd pprroojjeeccttiioonnss
 
@@ -122,16 +124,15 @@ postfix/mongo-virtual-mailboxes.cf file:
     collection = mailbox
     filter = {"$$or": [{"username":"%s"}, {"alias.address": "%s"}], "active":
     1}
-    projection = { "_id": 0, "mail_path":
-      {"$$concat": ["$$domain", "/", "$$local_part"]} }
+    projection = { "mail_path": {"$$concat": ["$$domain", "/", "$$local_part"]}
+    }
 
 This will return 'example.com/user' path built from the database fields.
 
 A couple of considerations when using projections:
 
-  * The '_id' field is always returned as part of the result set by MongoDB. It
-    should be excluded from the result in the projection. This is done
-    automatically when rreessuulltt__aattttrriibbuuttee is used.
+  * As with rreessuulltt__aattttrriibbuuttee, the mongodb client automatically removes the
+    '_id' field from a projection result.
 
   * When a query produces multiple results (separated by comma), the Postfix
     implementation will only parse fields with data types UTF8, INT32, INT64

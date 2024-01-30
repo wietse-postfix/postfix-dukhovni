@@ -11,9 +11,9 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
        mongodb_table - Postfix MongoDB client configuration
 
 <b>SYNOPSIS</b>
-       <b>postmap -q "</b><i>string</i><b>" mongodb:/etc/postfix/</b><i>filename</i>
+       <b>postmap -q "</b><i>string</i><b>" <a href="mongodb_table.5.html">mongodb</a>:/etc/postfix/</b><i>filename</i>
 
-       <b>postmap -q - mongodb:/etc/postfix/</b><i>filename</i> &lt;<i>inputfile</i>
+       <b>postmap -q - <a href="mongodb_table.5.html">mongodb</a>:/etc/postfix/</b><i>filename</i> &lt;<i>inputfile</i>
 
 <b>DESCRIPTION</b>
        The  Postfix  mail system uses optional tables for address rewriting or
@@ -22,7 +22,7 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
        Alternatively, lookup tables can be specified as MongoDB databases.  In
        order to use MongoDB lookups, define a MongoDB source as a lookup table
        in <a href="postconf.5.html">main.cf</a>, for example:
-           <a href="postconf.5.html#alias_maps">alias_maps</a> = mongodb:/etc/postfix/mongodb-aliases.cf
+           <a href="postconf.5.html#alias_maps">alias_maps</a> = <a href="mongodb_table.5.html">mongodb</a>:/etc/postfix/mongodb-aliases.cf
 
        In this example, the file /etc/postfix/mongodb-aliases.cf has the  same
        format  as  the  Postfix  <a href="postconf.5.html">main.cf</a>  file, and can specify the parameters
@@ -31,36 +31,36 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
 
        It is strongly recommended to use <a href="proxymap.8.html">proxy</a>:mongodb, in order to reduce the
        number of database connections. For example:
-           <a href="postconf.5.html#alias_maps">alias_maps</a> = <a href="proxymap.8.html">proxy</a>:mongodb:/etc/postfix/mongodb-aliases.cf
+           <a href="postconf.5.html#alias_maps">alias_maps</a> = <a href="proxymap.8.html">proxy</a>:<a href="mongodb_table.5.html">mongodb</a>:/etc/postfix/mongodb-aliases.cf
 
-       Note: when using <a href="proxymap.8.html">proxy</a>:mongodb:/<i>file</i>, the file must be readable by  the
+       Note: when using <a href="proxymap.8.html">proxy</a>:<a href="mongodb_table.5.html">mongodb</a>:/<i>file</i>, the file must be readable by  the
        unprivileged  postfix  user (specified with the Postfix <a href="postconf.5.html#mail_owner">mail_owner</a> con-
        figuration parameter).
 
 <b>MONGODB PARAMETERS</b>
        <b>uri</b>    The URI of mongo server/cluster that Postfix will try to connect
-              to and query from.  Please see <b><a href="https://www.mongodb.com/docs/man-</b>
-">https://www.mongodb.com/docs/man-</b>
-</a>              <b>ual/reference/connection-string/</b> Examples:
+              to and query from. Please see
+              <a href="https://www.mongodb.com/docs/manual/reference/connection-string/">https://www.mongodb.com/docs/manual/reference/connection-string/</a>
+
+              Example:
                   uri = mongodb+srv://user:pass@loclhost:27017/mail
 
        <b>dbname</b> Name of the database to read the information from.  Example:
                   dbname = mail
 
        <b>collection</b>
-              Name of the collection (table) to  read  the  information  from.
+              Name  of  the  collection  (table) to read the information from.
               Example:
                   collection = mailbox
 
        <b>query_filter</b>
               The MongoDB query template used to search the database, where <b>%s</b>
-              is a substitute for the address Postfix is  trying  to  resolve.
-              Please       see       <b><a href="https://www.mongodb.com/docs/manual/tuto-</b>
-">https://www.mongodb.com/docs/manual/tuto-</b>
-</a>              <b>rial/query-documents/</b>
+              is  a substitute for the email address that Postfix is trying to
+              resolve. Please see:
+              <a href="https://www.mongodb.com/docs/manual/tutorial/query-documents/">https://www.mongodb.com/docs/manual/tutorial/query-documents/</a>
 
-              e.g.
-                  query_filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
+              Example:
+                  query_filter = {"$or": [{"username": "%s"}, {"alias.address": "%s"}], "active": 1}
 
               This parameter supports the following '%' expansions:
 
@@ -68,8 +68,8 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
 
               <b>%s</b>     This is replaced by the input key. The %s must appear  in
                      quotes,  because all Postfix queries are strings contain-
-                     ing (parts from)  domains  or  email  addresses;  Postfix
-                     makes no numerical queries.
+                     ing (parts from) a domain or email address. Postfix makes
+                     no numerical queries.
 
               <b>%u</b>     When the input key is an address of the form user@domain,
                      <b>%u</b> is replaced by the local part of the address.   Other-
@@ -83,14 +83,13 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
                      domain. If the input key is  <i>user@mail.example.com</i>,  then
                      %1 is <b>com</b>, %2 is <b>example</b> and %3 is <b>mail</b>.
 
-       In  the  above  substitutions, charcaters will be quoted as required by
+       In  the  above  substitutions, characters will be quoted as required by
        <a href="https://tools.ietf.org/html/rfc4627">RFC 4627</a>. For example, each double quote or backslash character will be
        escaped with a backslash characacter.
 
        <b>projection (optional)</b>
-              Advanced MongoDB query projections. Please see: <b><a href="https://www.mon-</b>
-">https://www.mon-</b>
-</a>              <b>godb.com/docs/manual/tutorial/project-fields-from-query-results/</b>
+              Advanced MongoDB query projections. Please see:
+              <a href="https://www.mongodb.com/docs/manual/tutorial/project-fields-from-query-results/">https://www.mongodb.com/docs/manual/tutorial/project-fields-from-query-results/</a>
 
               NOTE:  If  a projection is specified, 'result_attribute' will be
               ignored.
@@ -99,60 +98,63 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
               and  return string (UTF8), integer (int32, int64) and array type
               fields. Any other type of field in the result will raise a warn-
               ing.  Make sure to adjust the projection as needed.  Please see:
-              <b><a href="https://mongoc.org/libbson/current/bson_type_t.html</b>">https://mongoc.org/libbson/current/bson_type_t.html</b></a>
+              <a href="https://mongoc.org/libbson/current/bson_type_t.html">https://mongoc.org/libbson/current/bson_type_t.html</a>
 
-              For example, _id field (type OID) can not be parsed  and  should
-              be turned off :
-                  projection = { "_id":0, "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
+              The _id field (type OID) can not be parsed and is  automatically
+              removed from projection results. For example, the projection
+                  projection = { "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
+              will  not return any _id field information (as if the projection
+              was specified as { "_id": 0, "mail_path": { ...} }).
 
        <b>result_attribute</b>
               Comma separated list of fields to be returned.
 
        <b>result_format (default: %s</b>)
               Format template applied to result attributes. Most commonly used
-              to append (or prepend) text to the result. This  parameter  sup-
+              to  append  (or prepend) text to the result. This parameter sup-
               ports the following '%' expansions:
 
-              NOTE:  If  a  projection is not specified, 'result_attribute' is
+              NOTE: If a projection is not  specified,  'result_attribute'  is
               required.
 
               <b>%%</b>     This is replaced by a literal '%' character. (Postfix 2.2
                      and later).
 
-              <b>%s</b>     This  is  replaced  by the value of the result attribute.
+              <b>%s</b>     This is replaced by the value of  the  result  attribute.
                      When result is empty it is skipped.
 
               <b>%u</b>     When the result attribute value is an address of the form
-                     user@domain,  <b>%u</b>  is  replaced  by  the local part of the
-                     address. When the result has an  empty  localpart  it  is
+                     user@domain, <b>%u</b> is replaced by  the  local  part  of  the
+                     address.  When  the  result  has an empty localpart it is
                      skipped.
 
-              <b>%d</b>     When  a  result attribute value is an address of the form
-                     user@domain, <b>%d</b> is replaced by the  domain  part  of  the
-                     attribute  value.  When  the  result is unqualified it is
+              <b>%d</b>     When a result attribute value is an address of  the  form
+                     user@domain,  <b>%d</b>  is  replaced  by the domain part of the
+                     attribute value. When the result  is  unqualified  it  is
                      skipped.
 
               <b>%[SUD1-9]</b>
-                     The upper-case and decimal digit  expansions  interpolate
-                     the  parts of the input key rather than the result. Their
-                     behavior is identical to that described  with  <b>query_fil-</b>
-                     <b>ter</b>,  and  in  fact  because  the  input  key is known in
-                     advance, lookups whose  key  does  not  contain  all  the
-                     information  specified  in  the  result template are sup-
+                     The  upper-case  and decimal digit expansions interpolate
+                     the parts of the input key rather than the result.  Their
+                     behavior  is  identical to that described with <b>query_fil-</b>
+                     <b>ter</b>, and in fact  because  the  input  key  is  known  in
+                     advance,  lookups  whose  key  does  not  contain all the
+                     information specified in the  result  template  are  sup-
                      pressed and return no results.
 
               For example, using "result_format = <a href="smtp.8.html">smtp</a>:[%s]" allows one to use
               a mailHost attribute as the basis of a <a href="transport.5.html">transport(5)</a> table. After
-              applying the result format, multiple values are concatenated  as
+              applying  the result format, multiple values are concatenated as
               comma separated strings. The expansion_limit parameter explained
               below allows one to restrict the number of values in the result,
-              which  is especially useful for maps that should return a single
+              which is especially useful for maps that should return a  single
               value.
 
-              The default value <b>%s</b> specifies that each attribute value  should
+              The  default value <b>%s</b> specifies that each attribute value should
               be used as is.
 
-              NOTE: DO NOT put quotes around the result format!
+              NOTE: DO NOT put quotes around the result format! The result  is
+              not a JSON string.
 
        <b>domain (default: no domain list)</b>
               This  is a list of domain names, paths to files, or "<a href="DATABASE_README.html">type:table</a>"
@@ -175,7 +177,7 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
        source  a  name  that  doesn't begin with a slash or a dot. The MongoDB
        parameters will then be accessible as the name you've given the  source
        in  its  definition,  an underscore, and the name of the parameter. For
-       example, if a map is specified as "mongodb:<i>mongodb</i><b>_</b><i>source</i>",  the  "uri"
+       example, if a map is specified as "<a href="mongodb_table.5.html">mongodb</a>:<i>mongodb</i><b>_</b><i>source</i>",  the  "uri"
        parameter would be defined in <a href="postconf.5.html">main.cf</a> as "<i>mongodb</i><b>_</b><i>source</i>_uri".
 
        Note:  with  this form, passwords are written in <a href="postconf.5.html">main.cf</a>, which is nor-
@@ -202,6 +204,10 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
        P.O. Box 213
        5627 Kanan Rd.,
        Agoura Hills, CA, USA#
+
+       Edited by:
+       Wietse Venema
+       porcupine.org
 
        Based on prior work by:
        Stephan Ferraro

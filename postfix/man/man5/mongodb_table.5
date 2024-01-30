@@ -46,10 +46,13 @@ with the Postfix mail_owner configuration parameter).
 .ad
 .fi
 .IP "\fBuri\fR"
-The URI of mongo server/cluster that Postfix will try to connect
-to and query from.
-Please see \fBhttps://www.mongodb.com/docs/manual/reference/connection\-string/\fR
-Examples:
+The URI of mongo server/cluster that Postfix will try to
+connect to and query from. Please see
+.nf
+https://www.mongodb.com/docs/manual/reference/connection\-string/
+.fi
+
+Example:
 .nf
     uri = mongodb+srv://user:pass@loclhost:27017/mail
 .fi
@@ -67,13 +70,15 @@ Example:
 .fi
 .IP "\fBquery_filter\fR"
 The MongoDB query template used to search the database,
-where \fB%s\fR is a substitute for the address Postfix is
-trying to resolve. Please see
-\fBhttps://www.mongodb.com/docs/manual/tutorial/query\-documents/\fR
-
-e.g.
+where \fB%s\fR is a substitute for the email address that
+Postfix is trying to resolve. Please see:
 .nf
-    query_filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
+https://www.mongodb.com/docs/manual/tutorial/query\-documents/
+.fi
+
+Example:
+.nf
+    query_filter = {"$or": [{"username": "%s"}, {"alias.address": "%s"}], "active": 1}
 .fi
 
 This parameter supports the following '%' expansions:
@@ -83,7 +88,7 @@ This is replaced by a literal '%' character.
 .IP "\fB%s\fR"
 This is replaced by the input key. The %s must appear in
 quotes, because all Postfix queries are strings containing
-(parts from) domains or email addresses; Postfix makes no
+(parts from) a domain or email address. Postfix makes no
 numerical queries.
 .IP "\fB%u\fR"
 When the input key is an address of the form user@domain, \fB%u\fR
@@ -99,13 +104,15 @@ input key is \fIuser@mail.example.com\fR, then %1 is \fBcom\fR,
 %2 is \fBexample\fR and %3 is \fBmail\fR.
 .RE
 .PP
-In the above substitutions, charcaters will be quoted as
+In the above substitutions, characters will be quoted as
 required by RFC 4627. For example, each double quote or
 backslash character will be escaped with a backslash
 characacter.
 .IP "\fBprojection (optional)\fR"
 Advanced MongoDB query projections. Please see:
-\fBhttps://www.mongodb.com/docs/manual/tutorial/project\-fields\-from\-query\-results/\fR
+.nf
+https://www.mongodb.com/docs/manual/tutorial/project\-fields\-from\-query\-results/
+.fi
 
 NOTE: If a projection is specified, 'result_attribute' will
 be ignored.
@@ -115,13 +122,15 @@ parse and return string (UTF8), integer (int32, int64) and
 array type fields. Any other type of field in the result
 will raise a warning. Make sure to adjust the projection
 as needed.  Please see:
-\fBhttps://mongoc.org/libbson/current/bson_type_t.html\fR
+https://mongoc.org/libbson/current/bson_type_t.html
 
-For example, _id field (type OID) can not be parsed and
-should be turned off :
+The _id field (type OID) can not be parsed and is automatically
+removed from projection results. For example, the projection
 .nf
-    projection = { "_id":0, "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
+    projection = { "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
 .fi
+will not return any _id field information (as if the projection
+was specified as { "_id": 0, "mail_path": { ...} }).
 .IP "\fBresult_attribute\fR"
 Comma separated list of fields to be returned.
 .IP "\fBresult_format (default: \fB%s\fR)\fR"
@@ -168,7 +177,8 @@ should return a single value.
 The default value \fB%s\fR specifies that each
 attribute value should be used as is.
 
-NOTE: DO NOT put quotes around the result format!
+NOTE: DO NOT put quotes around the result format! The result
+is not a JSON string.
 .IP "\fBdomain (default: no domain list)\fR"
 This is a list of domain names, paths to files, or
 "type:table" databases. When specified, only fully qualified search
@@ -237,6 +247,10 @@ Dextrous Technologies, LLC
 P.O. Box 213
 5627 Kanan Rd.,
 Agoura Hills, CA, USA#
+
+Edited by:
+Wietse Venema
+porcupine.org
 
 Based on prior work by:
 Stephan Ferraro

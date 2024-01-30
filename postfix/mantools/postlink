@@ -1248,6 +1248,7 @@ while (<>) {
     s/\b(ldap[is]?):/<a href="ldap_table.5.html">$1<\/a>:/g;
     s/\b(lmdb):/<a href="lmdb_table.5.html">$1<\/a>:/g;
     s/\b(memcache):/<a href="memcache_table.5.html">$1<\/a>:/g;
+    s/\b(mongodb):/<a href="mongodb_table.5.html">$1<\/a>:/g;
     s/\b(mysql):/<a href="mysql_table.5.html">$1<\/a>:/g;
     s/\b(nisplus):/<a href="nisplus_table.5.html">$1<\/a>:/g;
     s/\b(pcre):/<a href="pcre_table.5.html">$1<\/a>:/g;
