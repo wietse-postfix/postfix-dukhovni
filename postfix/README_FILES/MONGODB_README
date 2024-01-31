@@ -73,8 +73,8 @@ and in mongodb:/etc/postfix/mongo-virtual-aliases.cf you have:
     uri = mongodb+srv://user_name:password@some_server
     dbname = mail
     collection = mailbox
-    filter = {"$$or": [{"username":"%s"}, {"alias.address": "%s"}], "active":
-    1}
+    query_filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}],
+    "active": 1}
     result_attribute = username
 
 This example assumes mailbox names are stored in a MongoDB backend, in a format
@@ -122,10 +122,8 @@ postfix/mongo-virtual-mailboxes.cf file:
     uri = mongodb+srv://user_name:password@some_server
     dbname = mail
     collection = mailbox
-    filter = {"$$or": [{"username":"%s"}, {"alias.address": "%s"}], "active":
-    1}
-    projection = { "mail_path": {"$$concat": ["$$domain", "/", "$$local_part"]}
-    }
+    filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
+    projection = { "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
 
 This will return 'example.com/user' path built from the database fields.
 

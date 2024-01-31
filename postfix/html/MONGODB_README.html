@@ -74,7 +74,7 @@ table lookup in <a href="postconf.5.html">main.cf</a>, for example: </p>
 
 <blockquote>
 <pre>
-<a href="postconf.5.html#alias_maps">alias_maps</a> = <a href="DATABASE_README.html#types">hash</a>:/etc/aliases, <a href="proxymap.8.html">proxy</a>:mongodb:/etc/postfix/mongo-aliases.cf
+<a href="postconf.5.html#alias_maps">alias_maps</a> = <a href="DATABASE_README.html#types">hash</a>:/etc/aliases, <a href="proxymap.8.html">proxy</a>:<a href="mongodb_table.5.html">mongodb</a>:/etc/postfix/mongo-aliases.cf
 </pre>
 </blockquote>
 
@@ -90,18 +90,18 @@ aliases. Assume that in <a href="postconf.5.html">main.cf</a>, you have: </p>
 <blockquote> 
 <pre>
 <a href="postconf.5.html#virtual_alias_maps">virtual_alias_maps</a> = <a href="DATABASE_README.html#types">hash</a>:/etc/postfix/virtual_aliases, 
-    <a href="proxymap.8.html">proxy</a>:mongodb:/etc/postfix/mongo-virtual-aliases.cf
+    <a href="proxymap.8.html">proxy</a>:<a href="mongodb_table.5.html">mongodb</a>:/etc/postfix/mongo-virtual-aliases.cf
 </pre>
 </blockquote> 
 
-<p> and in mongodb:/etc/postfix/mongo-virtual-aliases.cf you have: </p>
+<p> and in <a href="mongodb_table.5.html">mongodb</a>:/etc/postfix/mongo-virtual-aliases.cf you have: </p>
 
 <blockquote> 
 <pre>
 uri = mongodb+srv://user_name:password@some_server
 dbname = mail
 collection = mailbox
-filter = {"$$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
+query_filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
 result_attribute = username
 </pre>
 </blockquote> 
@@ -163,15 +163,15 @@ use of MongoDB projections to achieve the goal. </p>
 </blockquote> 
 
 <p><a href="postconf.5.html#virtual_mailbox_maps">virtual_mailbox_maps</a> can be created using below parameters ina
-a mongodb:/etc/postfix/mongo-virtual-mailboxes.cf file:</p>
+a <a href="mongodb_table.5.html">mongodb</a>:/etc/postfix/mongo-virtual-mailboxes.cf file:</p>
 
 <blockquote> 
 <pre>
 uri = mongodb+srv://user_name:password@some_server
 dbname = mail
 collection = mailbox
-filter = {"$$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
-projection = { "mail_path": {"$$concat": ["$$domain", "/", "$$local_part"]} }
+filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
+projection = { "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
 </pre>
 </blockquote> 
 
