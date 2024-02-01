@@ -95,7 +95,7 @@
 #	input key is \fIuser@mail.example.com\fR, then %1 is \fBcom\fR,
 #	%2 is \fBexample\fR and %3 is \fBmail\fR.
 # .RE
-# .PP
+# .IP
 #	In the above substitutions, characters will be quoted as
 #	required by RFC 4627. For example, each double quote or
 #	backslash character will be escaped with a backslash
