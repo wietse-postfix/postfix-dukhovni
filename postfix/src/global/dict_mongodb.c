@@ -158,7 +158,6 @@ static void mongodb_parse_config(DICT_MONGODB *dict_mongodb,
 				         const char *mongodbcf)
 {
     CFG_PARSER *p = dict_mongodb->parser;
-    char   *junk;
 
     /*
      * Parse the configuration file.
@@ -166,32 +165,17 @@ static void mongodb_parse_config(DICT_MONGODB *dict_mongodb,
     dict_mongodb->uri = cfg_get_str(p, "uri", NULL, 1, 0);
     dict_mongodb->dbname = cfg_get_str(p, "dbname", NULL, 1, 0);
     dict_mongodb->collection = cfg_get_str(p, "collection", NULL, 1, 0);
-    dict_mongodb->query_filter = cfg_get_str(p, "query_filter", NULL, 0, 0);
-    if (dict_mongodb->query_filter == 0)
-	dict_mongodb->query_filter = cfg_get_str(p, "filter", NULL, 1, 0);
+    dict_mongodb->query_filter = cfg_get_str(p, "query_filter", NULL, 1, 0);
 
     /*
      * One of projection and result_attribute must be specified. That is
      * enforced in the caller.
-     * 
-     * Insert a gratuitous "_id": 0 into the projection, for parity with the
-     * result_attribute feature which implicitly suppresses the _id field.
      */
-    junk = cfg_get_str(p, "projection", NULL, 0, 0);
-    if (junk != 0 && *junk == '{') {
-	dict_mongodb->projection =
-	    concatenate("{\"_id\": 0,", junk + 1, (char *) 0);
-	myfree(junk);
-    }
     dict_mongodb->projection = cfg_get_str(p, "projection", NULL, 0, 0);
     dict_mongodb->result_attribute
 	= cfg_get_str(p, "result_attribute", NULL, 0, 0);
     dict_mongodb->result_format
-	= cfg_get_str(dict_mongodb->parser, "result_format", NULL, 0, 0);
-    if (dict_mongodb->result_format == 0) {
-	dict_mongodb->result_format
-	    = cfg_get_str(dict_mongodb->parser, "result_filter", "%s", 1, 0);
-    }
+	= cfg_get_str(dict_mongodb->parser, "result_format", "%s", 1, 0);
     dict_mongodb->expansion_limit
 	= cfg_get_int(dict_mongodb->parser, "expansion_limit", 10, 0, 100);
 
@@ -322,6 +306,22 @@ static void dict_mongdb_quote(DICT *dict, const char *name, VSTRING *result)
     (void) quote_for_json_append(result, name, -1);
 }
 
+/* dict_mongdb_append_result_attributes - projection builder */
+
+static int dict_mongdb_append_result_attribute(bson_t * projection,
+				               const char *result_attribute)
+{
+    char   *ra = mystrdup(result_attribute);
+    char   *pp = ra;
+    char   *cp;
+    int     ok = 1;
+
+    while (ok && (cp = mystrtok(&pp, ",")) != 0)
+	ok = BSON_APPEND_INT32(projection, cp, 1);
+    myfree(ra);
+    return (ok);
+}
+
 /* dict_mongodb_lookup - find database entry using mongo query language */
 
 static const char *dict_mongodb_lookup(DICT *dict, const char *name)
@@ -339,7 +339,6 @@ static const char *dict_mongodb_lookup(DICT *dict, const char *name)
     static VSTRING *queryString = NULL;
     static VSTRING *resultString = NULL;
     int     domain_rc;
-    char   *p = NULL;
     int     expansion = 0;
 
     dict_mongodb->dict.error = DICT_ERR_NONE;
@@ -389,36 +388,50 @@ static const char *dict_mongodb_lookup(DICT *dict, const char *name)
 		 dict_mongodb->collection, dict_mongodb->dbname);
 	DICT_MONGODB_LOOKUP_ERR_RETURN(DICT_ERR_RETRY);
     }
+
+    /*
+     * Use the specified result projection, or craft one from the
+     * result_attribute. Exclude the _id field from the result.
+     */
     options = bson_new();
-    /* Is a projection provided ? */
     if (dict_mongodb->projection) {
-	/* Use provided projection, ignore result_attribute */
 	projection = bson_new_from_json((uint8_t *) dict_mongodb->projection,
 					-1, &error);
 	if (!projection) {
-	    msg_warn("%s:%s: failed to create a projection from '%s' : %s",
+	    msg_warn("%s:%s: failed to create a projection from '%s': %s",
 		     dict_mongodb->dict.type, dict_mongodb->dict.name,
 		     dict_mongodb->projection, error.message);
 	    DICT_MONGODB_LOOKUP_ERR_RETURN(DICT_ERR_RETRY);
 	}
-	BSON_APPEND_DOCUMENT(options, "projection", projection);
-    } else {
-	/* Create a projection using result_attribute. */
-	if (!dict_mongodb->result_attribute) {
-	    msg_panic("%s:%s: 'result_attribute' cannot be empty!",
-		      dict_mongodb->dict.type, dict_mongodb->dict.name);
+	if (!BSON_APPEND_INT32(projection, "_id", 0)
+	    || !BSON_APPEND_DOCUMENT(options, "projection", projection)) {
+	    msg_warn("%s:%s: failed to append a projection from '%s'",
+		     dict_mongodb->dict.type, dict_mongodb->dict.name,
+		     dict_mongodb->projection);
+	    DICT_MONGODB_LOOKUP_ERR_RETURN(DICT_ERR_RETRY);
 	}
-	char   *ra = mystrdup(dict_mongodb->result_attribute);
-	char   *pp = ra;
-
+    } else if (dict_mongodb->result_attribute) {
 	projection = bson_new();
-	BSON_APPEND_DOCUMENT_BEGIN(options, "projection", projection);
-	BSON_APPEND_INT32(projection, "_id", 0);
-	while ((p = mystrtok(&pp, ",")) != 0) {
-	    BSON_APPEND_INT32(projection, p, 1);
+	if (!projection) {
+	    msg_warn("%s:%s: failed to create an empty projection: %s",
+		     dict_mongodb->dict.type, dict_mongodb->dict.name,
+		     error.message);
+	    DICT_MONGODB_LOOKUP_ERR_RETURN(DICT_ERR_RETRY);
 	}
-	bson_append_document_end(options, projection);
-	myfree(ra);
+	if (!BSON_APPEND_DOCUMENT_BEGIN(options, "projection", projection)
+	    || !BSON_APPEND_INT32(projection, "_id", 0)
+	    || !dict_mongdb_append_result_attribute(projection,
+					     dict_mongodb->result_attribute)
+	    || !bson_append_document_end(options, projection)) {
+	    msg_warn("%s:%s: failed to append a projection from '%s'",
+		     dict_mongodb->dict.type, dict_mongodb->dict.name,
+		     dict_mongodb->result_attribute);
+	    DICT_MONGODB_LOOKUP_ERR_RETURN(DICT_ERR_RETRY);
+	}
+    } else {
+	/* Can't happen. The configuration parser should reject this. */
+	msg_panic("%s:%s: empty 'projection' and 'result_attribute'",
+		  dict_mongodb->dict.type, dict_mongodb->dict.name);
     }
 
     /*
@@ -435,7 +448,7 @@ static const char *dict_mongodb_lookup(DICT *dict, const char *name)
     query = bson_new_from_json((uint8_t *) vstring_str(queryString),
 			       -1, &error);
     if (!query) {
-	msg_warn("%s:%s: failed to create a query from '%s' : %s",
+	msg_warn("%s:%s: failed to create a query from '%s': %s",
 		 dict_mongodb->dict.type, dict_mongodb->dict.name,
 		 vstring_str(queryString), error.message);
 	DICT_MONGODB_LOOKUP_ERR_RETURN(DICT_ERR_RETRY);
@@ -519,10 +532,12 @@ DICT   *dict_mongodb_open(const char *name, int open_flags, int dict_flags)
 
     /* Parse config. */
     mongodb_parse_config(dict_mongodb, name);
-    if (!dict_mongodb->projection && !dict_mongodb->result_attribute)
+    if (!dict_mongodb->projection == !dict_mongodb->result_attribute) {
+	dict_mongodb_close(&dict_mongodb->dict);
 	return (dict_surrogate(DICT_TYPE_MONGODB, name, open_flags, dict_flags,
-			"%s:%s: missing 'projection' or 'result_attribute'",
+		 "%s:%s: specify one of 'projection' or 'result_attribute'",
 			       DICT_TYPE_MONGODB, name));
+    }
 
     /* One-time initialization of libmongoc 's internals. */
     if (!init_done) {

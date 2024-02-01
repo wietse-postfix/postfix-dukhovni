@@ -34,6 +34,10 @@ extern DICT *dict_mongodb_open(const char *, int, int);
 /*	5627 Kanan Rd.,
 /*	Agoura Hills, CA
 /*
+/*	Edited by:
+/*	Wietse Venema
+/*	porcupine.org
+/*
 /*	Based on prior work by:
 /*	Stephan Ferraro
 /*	Aionda GmbH

@@ -31,7 +31,7 @@ SRCS	= alldig.c allprint.c argv.c argv_split.c attr_clnt.c attr_print0.c \
 	username.c valid_hostname.c vbuf.c vbuf_print.c vstream.c \
 	vstream_popen.c vstring.c vstring_vstream.c watchdog.c \
 	write_buf.c sane_basename.c format_tv.c allspace.c \
-	allascii.c allhex.c load_file.c killme_after.c vstream_tweak.c \
+	allascii.c load_file.c killme_after.c vstream_tweak.c \
 	pass_trigger.c edit_file.c inet_windowsize.c \
 	unix_pass_fd_fix.c dict_cache.c valid_utf8_string.c dict_thash.c \
 	ip_match.c nbbio.c base32_code.c dict_test.c \
@@ -78,7 +78,7 @@ OBJS	= alldig.o allprint.o argv.o argv_split.o attr_clnt.o attr_print0.o \
 	username.o valid_hostname.o vbuf.o vbuf_print.o vstream.o \
 	vstream_popen.o vstring.o vstring_vstream.o watchdog.o \
 	write_buf.o sane_basename.o format_tv.o allspace.o \
-	allascii.o allhex.o load_file.o killme_after.o vstream_tweak.o \
+	allascii.o load_file.o killme_after.o vstream_tweak.o \
 	pass_trigger.o edit_file.o inet_windowsize.o \
 	unix_pass_fd_fix.o dict_cache.o valid_utf8_string.o dict_thash.o \
 	ip_match.o nbbio.o base32_code.o dict_test.o \
@@ -1134,12 +1134,6 @@ alldig.o: stringops.h
 alldig.o: sys_defs.h
 alldig.o: vbuf.h
 alldig.o: vstring.h
-allhex.o: allascii.c
-allhex.o: check_arg.h
-allhex.o: stringops.h
-allhex.o: sys_defs.h
-allhex.o: vbuf.h
-allhex.o: vstring.h
 allprint.o: allprint.c
 allprint.o: check_arg.h
 allprint.o: stringops.h

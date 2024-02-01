@@ -57,7 +57,6 @@ extern int allalnum(const char *);
 extern int allprint(const char *);
 extern int allspace(const char *);
 extern int allascii_len(const char *, ssize_t);
-extern int allhex_len(const char *, ssize_t);
 extern const char *WARN_UNUSED_RESULT split_nameval(char *, char **, char **);
 extern const char *WARN_UNUSED_RESULT split_qnameval(char *, char **, char **);
 extern int valid_utf8_string(const char *, ssize_t);
@@ -80,7 +79,6 @@ extern char *quote_for_json_append(VSTRING *, const char *, ssize_t);
   * Convenience wrappers for most-common use cases.
   */
 #define allascii(s)	allascii_len((s), -1)
-#define allhex(s)	allhex_len((s), -1)
 #define casefold(dst, src) \
     casefoldx(util_utf8_enable ? CASEF_FLAG_UTF8 : 0, (dst), (src), -1)
 #define casefold_len(dst, src, len) \

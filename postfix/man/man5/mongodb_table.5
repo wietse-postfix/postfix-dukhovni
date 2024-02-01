@@ -114,32 +114,36 @@ Advanced MongoDB query projections. Please see:
 https://www.mongodb.com/docs/manual/tutorial/project\-fields\-from\-query\-results/
 .fi
 
-NOTE: If a projection is specified, 'result_attribute' will
-be ignored.
-
-NOTE: Please keep in mind, this implementation can only
-parse and return string (UTF8), integer (int32, int64) and
-array type fields. Any other type of field in the result
-will raise a warning. Make sure to adjust the projection
-as needed.  Please see:
+Notes:
+.RS
+.IP \(bu
+If \fBprojection\fR is specified, \fBresult_attribute\fR
+must be empty.
+.IP \(bu
+This implementation can extract information only from result
+fields that have type \fBstring\fR (UTF8), \fBinteger\fR
+(int32, int64) and \fBarray\fR. Other result fields will
+be ignored with a warning. Please see:
+.nf
 https://mongoc.org/libbson/current/bson_type_t.html
-
-The _id field (type OID) can not be parsed and is automatically
-removed from projection results. For example, the projection
+.fi
+.IP \(bu
+The _id field (type OID) is automatically removed from
+projection results. For example,
 .nf
     projection = { "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
 .fi
-will not return any _id field information (as if the projection
-was specified as { "_id": 0, "mail_path": { ...} }).
+will not return any _id information, as if the projection
+was specified as { "_id": 0, "mail_path": { ...} }.
+.RE
 .IP "\fBresult_attribute\fR"
-Comma separated list of fields to be returned.
+Comma separated list of fields to be returned. If
+\fBresult_attribute\fR is specified, \fBprojection\fR must
+be empty.
 .IP "\fBresult_format (default: \fB%s\fR)\fR"
 Format template applied to result attributes. Most commonly
 used to append (or prepend) text to the result. This parameter
 supports the following '%' expansions:
-
-NOTE: If a projection is not specified, 'result_attribute' is
-required.
 .RS
 .IP "\fB%%\fR"
 This is replaced by a literal '%' character. (Postfix 2.2
@@ -193,7 +197,7 @@ reduce the query load on the backend database. Example:
 A limit on the total number of result elements returned
 (as a comma separated list) by a lookup against the map.
 A setting of zero disables the limit. Lookups fail with a
-temporary error if the limit is exceeded.  Setting the
+temporary error if the limit is exceeded. Setting the
 limit to 1 ensures that lookups do not return multiple
 values.
 .SH "OBSOLETE MAIN.CF PARAMETERS"
