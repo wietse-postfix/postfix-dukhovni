@@ -140,7 +140,7 @@ with all email addresses in this list. </p>
 
 <blockquote> 
 <pre>
-filter = {"name": "%s", "active": 1}
+query_filter = {"name": "%s", "active": 1}
 result_attribute = address
 </pre>
 </blockquote> 
@@ -170,7 +170,7 @@ a <a href="mongodb_table.5.html">mongodb</a>:/etc/postfix/mongo-virtual-mailboxe
 uri = mongodb+srv://user_name:password@some_server
 dbname = mail
 collection = mailbox
-filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
+query_filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
 projection = { "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
 </pre>
 </blockquote> 

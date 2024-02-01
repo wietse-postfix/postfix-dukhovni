@@ -100,7 +100,7 @@ When it comes to mailing lists, one way of implementing one would be as below:
 using the filter below, will result in a comma separated string with all email
 addresses in this list.
 
-    filter = {"name": "%s", "active": 1}
+    query_filter = {"name": "%s", "active": 1}
     result_attribute = address
 
 EExxaammppllee:: aaddvvaanncceedd pprroojjeeccttiioonnss
@@ -122,7 +122,8 @@ postfix/mongo-virtual-mailboxes.cf file:
     uri = mongodb+srv://user_name:password@some_server
     dbname = mail
     collection = mailbox
-    filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}], "active": 1}
+    query_filter = {"$or": [{"username":"%s"}, {"alias.address": "%s"}],
+    "active": 1}
     projection = { "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
 
 This will return 'example.com/user' path built from the database fields.

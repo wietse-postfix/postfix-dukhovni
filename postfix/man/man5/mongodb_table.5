@@ -108,16 +108,15 @@ In the above substitutions, characters will be quoted as
 required by RFC 4627. For example, each double quote or
 backslash character will be escaped with a backslash
 characacter.
-.IP "\fBprojection (optional)\fR"
+.IP "\fBprojection\fR"
 Advanced MongoDB query projections. Please see:
 .nf
 https://www.mongodb.com/docs/manual/tutorial/project\-fields\-from\-query\-results/
 .fi
 
-Notes:
 .RS
 .IP \(bu
-If \fBprojection\fR is specified, \fBresult_attribute\fR
+If \fBprojection\fR is non\-empty, then \fBresult_attribute\fR
 must be empty.
 .IP \(bu
 This implementation can extract information only from result
@@ -128,18 +127,21 @@ be ignored with a warning. Please see:
 https://mongoc.org/libbson/current/bson_type_t.html
 .fi
 .IP \(bu
-The _id field (type OID) is automatically removed from
-projection results. For example,
-.nf
-    projection = { "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
-.fi
-will not return any _id information, as if the projection
-was specified as { "_id": 0, "mail_path": { ...} }.
+As with \fBresult_attribute\fR, the top\-level _id field
+(type OID) is automatically removed from projection results.
 .RE
 .IP "\fBresult_attribute\fR"
-Comma separated list of fields to be returned. If
-\fBresult_attribute\fR is specified, \fBprojection\fR must
-be empty.
+Comma separated list with the names of fields to be returned
+in a lookup result.
+
+.RS
+.IP \(bu
+If \fBresult_attribute\fR is non\-empty, then \fBprojection\fR
+must be empty.
+.IP \(bu
+As with \fBprojection\fR, the top\-level _id field (type
+OID) is automatically removed from lookup results.
+.RE
 .IP "\fBresult_format (default: \fB%s\fR)\fR"
 Format template applied to result attributes. Most commonly
 used to append (or prepend) text to the result. This parameter
