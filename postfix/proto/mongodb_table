@@ -123,8 +123,8 @@
 #	(type OID) is automatically removed from projection results.
 # .RE
 # .IP "\fBresult_attribute\fR"
-#	Comma separated list with the names of fields to be returned
-#	in a lookup result.
+#	Comma or whitespace separated list with the names of fields
+#	to be returned in a lookup result.
 #
 # .RS
 # .IP \(bu

@@ -316,7 +316,7 @@ static int dict_mongdb_append_result_attribute(bson_t * projection,
     char   *cp;
     int     ok = 1;
 
-    while (ok && (cp = mystrtok(&pp, ",")) != 0)
+    while (ok && (cp = mystrtok(&pp, CHARS_COMMA_SP)) != 0)
 	ok = BSON_APPEND_INT32(projection, cp, 1);
     myfree(ra);
     return (ok);
@@ -535,10 +535,9 @@ DICT   *dict_mongodb_open(const char *name, int open_flags, int dict_flags)
     if (!dict_mongodb->projection == !dict_mongodb->result_attribute) {
 	dict_mongodb_close(&dict_mongodb->dict);
 	return (dict_surrogate(DICT_TYPE_MONGODB, name, open_flags, dict_flags,
-		 "%s:%s: specify one of 'projection' or 'result_attribute'",
+	 "%s:%s: specify exactly one of 'projection' or 'result_attribute'",
 			       DICT_TYPE_MONGODB, name));
     }
-
     /* One-time initialization of libmongoc 's internals. */
     if (!init_done) {
 	mongoc_init();
