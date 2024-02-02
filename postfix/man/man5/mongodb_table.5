@@ -143,9 +143,10 @@ As with \fBprojection\fR, the top\-level _id field (type
 OID) is automatically removed from lookup results.
 .RE
 .IP "\fBresult_format (default: \fB%s\fR)\fR"
-Format template applied to result attributes. Most commonly
-used to append (or prepend) text to the result. This parameter
-supports the following '%' expansions:
+Format template applied to the result from \fBprojection\fR
+or \fBresult_attribute\fR. Most commonly used to append (or
+prepend) text to the result. This parameter supports the
+following '%' expansions:
 .RS
 .IP "\fB%%\fR"
 This is replaced by a literal '%' character. (Postfix 2.2

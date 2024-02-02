@@ -114,75 +114,76 @@ MONGODB_TABLE(5)                                              MONGODB_TABLE(5)
                      automatically removed from lookup results.
 
        <b>result_format (default: %s</b>)
-              Format template applied to result attributes. Most commonly used
-              to append (or prepend) text to the result. This  parameter  sup-
-              ports the following '%' expansions:
+              Format  template  applied  to  the  result  from  <b>projection</b>  or
+              <b>result_attribute</b>. Most commonly used to append (or prepend) text
+              to  the result. This parameter supports the following '%' expan-
+              sions:
 
               <b>%%</b>     This is replaced by a literal '%' character. (Postfix 2.2
                      and later).
 
-              <b>%s</b>     This is replaced by the value of  the  result  attribute.
+              <b>%s</b>     This  is  replaced  by the value of the result attribute.
                      When result is empty it is skipped.
 
               <b>%u</b>     When the result attribute value is an address of the form
-                     user@domain, <b>%u</b> is replaced by  the  local  part  of  the
-                     address.  When  the  result  has an empty localpart it is
+                     user@domain,  <b>%u</b>  is  replaced  by  the local part of the
+                     address. When the result has an  empty  localpart  it  is
                      skipped.
 
-              <b>%d</b>     When a result attribute value is an address of  the  form
-                     user@domain,  <b>%d</b>  is  replaced  by the domain part of the
-                     attribute value. When the result  is  unqualified  it  is
+              <b>%d</b>     When  a  result attribute value is an address of the form
+                     user@domain, <b>%d</b> is replaced by the  domain  part  of  the
+                     attribute  value.  When  the  result is unqualified it is
                      skipped.
 
               <b>%[SUD1-9]</b>
-                     The  upper-case  and decimal digit expansions interpolate
-                     the parts of the input key rather than the result.  Their
-                     behavior  is  identical to that described with <b>query_fil-</b>
-                     <b>ter</b>, and in fact  because  the  input  key  is  known  in
-                     advance,  lookups  whose  key  does  not  contain all the
-                     information specified in the  result  template  are  sup-
+                     The upper-case and decimal digit  expansions  interpolate
+                     the  parts of the input key rather than the result. Their
+                     behavior is identical to that described  with  <b>query_fil-</b>
+                     <b>ter</b>,  and  in  fact  because  the  input  key is known in
+                     advance, lookups whose  key  does  not  contain  all  the
+                     information  specified  in  the  result template are sup-
                      pressed and return no results.
 
               For example, using "result_format = <a href="smtp.8.html">smtp</a>:[%s]" allows one to use
               a mailHost attribute as the basis of a <a href="transport.5.html">transport(5)</a> table. After
-              applying  the result format, multiple values are concatenated as
+              applying the result format, multiple values are concatenated  as
               comma separated strings. The expansion_limit parameter explained
               below allows one to restrict the number of values in the result,
-              which is especially useful for maps that should return a  single
+              which  is especially useful for maps that should return a single
               value.
 
-              The  default value <b>%s</b> specifies that each attribute value should
+              The default value <b>%s</b> specifies that each attribute value  should
               be used as is.
 
-              NOTE: DO NOT put quotes around the result format! The result  is
+              NOTE:  DO NOT put quotes around the result format! The result is
               not a JSON string.
 
        <b>domain (default: no domain list)</b>
-              This  is a list of domain names, paths to files, or "<a href="DATABASE_README.html">type:table</a>"
+              This is a list of domain names, paths to files, or  "<a href="DATABASE_README.html">type:table</a>"
               databases. When specified, only fully qualified search keys with
-              a  *non-empty*  localpart and a matching domain are eligible for
+              a *non-empty* localpart and a matching domain are  eligible  for
               lookup:  'user'  lookups,  bare  domain  lookups  and  "@domain"
-              lookups  are  not  performed.  This can significantly reduce the
+              lookups are not performed. This  can  significantly  reduce  the
               query load on the backend database. Example:
                   domain = postfix.org, <a href="DATABASE_README.html#types">hash</a>:/etc/postfix/searchdomains
 
        <b>expansion_limit (default: 0)</b>
-              A limit on the total number of result elements  returned  (as  a
+              A  limit  on  the total number of result elements returned (as a
               comma separated list) by a lookup against the map.  A setting of
-              zero disables the limit. Lookups fail with a temporary error  if
-              the  limit  is  exceeded.  Setting  the  limit to 1 ensures that
+              zero  disables the limit. Lookups fail with a temporary error if
+              the limit is exceeded. Setting  the  limit  to  1  ensures  that
               lookups do not return multiple values.
 
 <b>OBSOLETE MAIN.CF PARAMETERS</b>
-       MongoDB parameters can also be defined in <a href="postconf.5.html">main.cf</a>. Specify  as  MongoDB
-       source  a  name  that  doesn't begin with a slash or a dot. The MongoDB
-       parameters will then be accessible as the name you've given the  source
-       in  its  definition,  an underscore, and the name of the parameter. For
-       example, if a map is specified as "<a href="mongodb_table.5.html">mongodb</a>:<i>mongodb</i><b>_</b><i>source</i>",  the  "uri"
+       MongoDB  parameters  can also be defined in <a href="postconf.5.html">main.cf</a>. Specify as MongoDB
+       source a name that doesn't begin with a slash or  a  dot.  The  MongoDB
+       parameters  will then be accessible as the name you've given the source
+       in its definition, an underscore, and the name of  the  parameter.  For
+       example,  if  a map is specified as "<a href="mongodb_table.5.html">mongodb</a>:<i>mongodb</i><b>_</b><i>source</i>", the "uri"
        parameter would be defined in <a href="postconf.5.html">main.cf</a> as "<i>mongodb</i><b>_</b><i>source</i>_uri".
 
-       Note:  with  this form, passwords are written in <a href="postconf.5.html">main.cf</a>, which is nor-
-       mally world-readable, and '$' in a mongodb parameter setting  needs  to
+       Note: with this form, passwords are written in <a href="postconf.5.html">main.cf</a>, which  is  nor-
+       mally  world-readable,  and '$' in a mongodb parameter setting needs to
        be written as '$$'.
 
 <b>SEE ALSO</b>
