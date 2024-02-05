@@ -80,8 +80,13 @@ and in mongodb:/etc/postfix/mongo-virtual-aliases.cf you have:
 This example assumes mailbox names are stored in a MongoDB backend, in a format
 like:
 
-    { "username": "user@example.com", "alias": [ "admin@example.com",
-    "abuse@example.com" ] }
+    { "username": "user@example.com",
+      "alias": [
+        {"address": "admin@example.com"},
+        {"address": "abuse@example.com"}
+      ],
+      "active": 1
+    }
 
 Upon receiving mail for "admin@example.com" that isn't found in the /etc/
 postfix/virtual_aliases database, Postfix will search the MongoDB server/
@@ -103,6 +108,15 @@ addresses in this list.
     query_filter = {"name": "%s", "active": 1}
     result_attribute = address
 
+Notes:
+
+  * As with pprroojjeeccttiioonn, the Postfix mongodb client automatically removes the
+    top-level '_id' field from a result.
+
+  * The Postfix mongodb client will only parse result fields with data types
+    UTF8, INT32, INT64 and ARRAY. Other fields will be ignored, with a warning
+    in the logs.
+
 EExxaammppllee:: aaddvvaanncceedd pprroojjeeccttiioonnss
 
 This module also supports the use of more complex MongoDB projections. There
@@ -113,10 +127,17 @@ supports the use of MongoDB projections to achieve the goal.
 
 Consider the example below:
 
-    { "username": "user@example.com", "local_part": "user", "domain":
-    "example.com", "alias": [ "admin@example.com", "abuse@example.com" ] }
+    { "username": "user@example.com",
+      "local_part": "user",
+      "domain": "example.com",
+      "alias": [
+        {"address": "admin@example.com"},
+        {"address": "abuse@example.com"}
+      ],
+      "active": 1
+    }
 
-virtual_mailbox_maps can be created using below parameters ina a mongodb:/etc/
+virtual_mailbox_maps can be created using below parameters in a mongodb:/etc/
 postfix/mongo-virtual-mailboxes.cf file:
 
     uri = mongodb+srv://user_name:password@some_server
@@ -130,14 +151,13 @@ This will return 'example.com/user' path built from the database fields.
 
 A couple of considerations when using projections:
 
-  * As with rreessuulltt__aattttrriibbuuttee, the mongodb client automatically removes the
-    '_id' field from a projection result.
+  * As with rreessuulltt__aattttrriibbuuttee, the Postfix mongodb client automatically removes
+    the top-level '_id' field from a projection result.
 
-  * When a query produces multiple results (separated by comma), the Postfix
-    implementation will only parse fields with data types UTF8, INT32, INT64
-    and ARRAY. Other fields will generate a warning in the logs, and will be
-    ignored. It is suggested to exclude any unnecessary fields when using the
-    projections.
+  * The Postfix mongodb client will only parse fields with data types UTF8,
+    INT32, INT64 and ARRAY. Other fields will be ignored, with a warning in the
+    logs. It is suggested to exclude any unnecessary fields when using a
+    projection.
 
 FFeeeeddbbaacckk
 

@@ -111,7 +111,13 @@ in a format like:</p>
 
 <blockquote> 
 <pre>
-{ "username": "user@example.com", "alias": [ "admin@example.com", "abuse@example.com" ] }
+{ "username": "user@example.com",
+  "alias": [
+    {"address": "admin@example.com"},
+    {"address": "abuse@example.com"}
+  ],
+  "active": 1
+}
 </pre>
 </blockquote> 
 
@@ -145,6 +151,20 @@ result_attribute = address
 </pre>
 </blockquote> 
 
+<p> Notes: </p>
+
+<ul>
+
+<li><p> As with <b>projection</b>, the Postfix mongodb client
+automatically removes the top-level '_id' field from a result. </p>
+</li>
+
+<li><p> The Postfix mongodb client will only parse result fields
+with data types UTF8, INT32, INT64 and ARRAY. Other fields will be
+ignored, with a warning in the logs. </p> </li>
+
+</ul>
+
 <h2><a name="example_projections">Example: advanced projections</a></h2>
 
 <p>This module also supports the use of more complex MongoDB
@@ -158,12 +178,20 @@ use of MongoDB projections to achieve the goal. </p>
 
 <blockquote> 
 <pre>
-{ "username": "user@example.com", "local_part": "user", "domain": "example.com", "alias": [ "admin@example.com", "abuse@example.com" ] }
+{ "username": "user@example.com",
+  "local_part": "user",
+  "domain": "example.com", 
+  "alias": [ 
+    {"address": "admin@example.com"},
+    {"address": "abuse@example.com"}
+  ],
+  "active": 1
+}
 </pre>
 </blockquote> 
 
-<p><a href="postconf.5.html#virtual_mailbox_maps">virtual_mailbox_maps</a> can be created using below parameters ina
-a <a href="mongodb_table.5.html">mongodb</a>:/etc/postfix/mongo-virtual-mailboxes.cf file:</p>
+<p><a href="postconf.5.html#virtual_mailbox_maps">virtual_mailbox_maps</a> can be created using below parameters in a
+<a href="mongodb_table.5.html">mongodb</a>:/etc/postfix/mongo-virtual-mailboxes.cf file:</p>
 
 <blockquote> 
 <pre>
@@ -181,14 +209,14 @@ projection = { "mail_path": {"$concat": ["$domain", "/", "$local_part"]} }
 
 <ul>
 
-<li><p>As with <b>result_attribute</b>, the mongodb client automatically
-removes the '_id' field from a projection result. </p></li>
+<li><p>As with <b>result_attribute</b>, the Postfix mongodb client
+automatically removes the top-level '_id' field from a projection
+result. </p></li>
 
-<li><p>When a query produces multiple results (separated by comma),
-the Postfix implementation will only parse fields with data types
-UTF8, INT32, INT64 and ARRAY. Other fields will generate a warning
-in the logs, and will be ignored. It is suggested to exclude any
-unnecessary fields when using the projections. </p></li>
+<li><p> The Postfix mongodb client will only parse fields with data
+types UTF8, INT32, INT64 and ARRAY. Other fields will be ignored,
+with a warning in the logs. It is suggested to exclude any unnecessary
+fields when using a projection. </p></li>
 
 </ul>
 <h2><a name="feedback">Feedback</a></h2>
