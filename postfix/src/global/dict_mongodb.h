@@ -30,9 +30,6 @@ extern DICT *dict_mongodb_open(const char *, int, int);
 /* AUTHOR(S)
 /*	Hamid Maadani (hamid@dexo.tech)
 /*	Dextrous Technologies, LLC
-/*	P.O. Box 213
-/*	5627 Kanan Rd.,
-/*	Agoura Hills, CA
 /*
 /*	Edited by:
 /*	Wietse Venema

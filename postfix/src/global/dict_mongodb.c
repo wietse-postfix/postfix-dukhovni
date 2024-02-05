@@ -45,9 +45,6 @@
 /* AUTHOR(S)
 /*	Hamid Maadani (hamid@dexo.tech)
 /*	Dextrous Technologies, LLC
-/*	P.O. Box 213
-/*	5627 Kanan Rd.,
-/*	Agoura Hills, CA, USA
 /*
 /*	Edited by:
 /*	Wietse Venema
