@@ -141,8 +141,7 @@
 #	following '%' expansions:
 # .RS
 # .IP "\fB%%\fR"
-#	This is replaced by a literal '%' character. (Postfix 2.2
-#	and later).
+#	This is replaced by a literal '%' character.
 # .IP "\fB%s\fR"
 #	This is replaced by the value of the result attribute. When
 #	result is empty it is skipped.
