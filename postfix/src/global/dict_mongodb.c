@@ -408,24 +408,18 @@ static const char *dict_mongodb_lookup(DICT *dict, const char *name)
 	    DICT_MONGODB_LOOKUP_ERR_RETURN(DICT_ERR_RETRY);
 	}
     } else if (dict_mongodb->result_attribute) {
-	projection = bson_new();
-	if (!projection) {
-	    msg_warn("%s:%s: failed to create an empty projection: %s",
-		     dict_mongodb->dict.type, dict_mongodb->dict.name,
-		     error.message);
-	    DICT_MONGODB_LOOKUP_ERR_RETURN(DICT_ERR_RETRY);
-	}
-	if (!BSON_APPEND_DOCUMENT_BEGIN(options, "projection", projection)
-	    || !BSON_APPEND_INT32(projection, "_id", 0)
-	    || !dict_mongdb_append_result_attribute(projection,
+	bson_t  res_attr;
+
+	if (!BSON_APPEND_DOCUMENT_BEGIN(options, "projection", &res_attr)
+	    || !BSON_APPEND_INT32(&res_attr, "_id", 0)
+	    || !dict_mongdb_append_result_attribute(&res_attr,
 					     dict_mongodb->result_attribute)
-	    || !bson_append_document_end(options, projection)) {
+	    || !bson_append_document_end(options, &res_attr)) {
 	    msg_warn("%s:%s: failed to append a projection from '%s'",
 		     dict_mongodb->dict.type, dict_mongodb->dict.name,
 		     dict_mongodb->result_attribute);
 	    DICT_MONGODB_LOOKUP_ERR_RETURN(DICT_ERR_RETRY);
 	}
-	/* XXX Calling bson_destroy(projection) will not fix a memory leak. */
     } else {
 	/* Can't happen. The configuration parser should reject this. */
 	msg_panic("%s:%s: empty 'projection' and 'result_attribute'",
