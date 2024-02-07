@@ -425,6 +425,7 @@ static const char *dict_mongodb_lookup(DICT *dict, const char *name)
 		     dict_mongodb->result_attribute);
 	    DICT_MONGODB_LOOKUP_ERR_RETURN(DICT_ERR_RETRY);
 	}
+	/* XXX Calling bson_destroy(projection) will not fix a memory leak. */
     } else {
 	/* Can't happen. The configuration parser should reject this. */
 	msg_panic("%s:%s: empty 'projection' and 'result_attribute'",
@@ -479,6 +480,8 @@ static void dict_mongodb_close(DICT *dict)
     if (dict_mongodb->ctx) {
 	db_common_free_ctx(dict_mongodb->ctx);
     }
+    myfree(dict_mongodb->uri);
+    myfree(dict_mongodb->dbname);
     myfree(dict_mongodb->collection);
     myfree(dict_mongodb->query_filter);
 
